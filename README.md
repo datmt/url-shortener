@@ -1,4 +1,13 @@
-# URL Shortener (Go + SQLite + Swagger UI)
+# TLDR: Use docker
+https://hub.docker.com/r/dattm24/url-shortener
+
+<!-- show docker run command -->
+```bash
+docker run -d -p 8080:8080 -e ADMIN_KEY=your_admin_key -e DB_PATH=/app/data.db dattm24/url-shortener
+```
+
+
+# URL Shortener (Go + SQLite)
 
 A simple self-hosted URL shortener written in Go with:
 
