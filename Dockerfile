@@ -20,6 +20,7 @@ RUN apk add --no-cache sqlite-libs ca-certificates
 WORKDIR /app
 
 COPY --from=builder /app/url-shortener /app/url-shortener
+COPY --from=builder /app/ui /app/ui
 
 ENV DB_PATH=/data/url-shortener.db
 EXPOSE 8080
