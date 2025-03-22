@@ -30,10 +30,11 @@ func main() {
 	store := &Storage{DB: db}
 	handler := &Handler{Store: store, AdminKey: adminKey}
 
-	http.HandleFunc("/shorten", withDB(db, BasicAuth(handler.CreateOrUpdateShortLink)))
+	http.HandleFunc("/shorten", withDB(db, BasicAuth(dispatch(handler))))
 	http.HandleFunc("/shorten/", withDB(db, BasicAuth(handler.GetShortLink)))
 	http.HandleFunc("/delete/", withDB(db, BasicAuth(handler.DeleteShortLink)))
 	http.HandleFunc("/admin/create-user", handler.CreateUser)
+	http.Handle("/ui/", http.StripPrefix("/ui/", http.FileServer(http.Dir("ui"))))
 	http.HandleFunc("/r/", handler.Redirect)
 
 	log.Println("Server started at :" + port)
@@ -45,5 +46,17 @@ func withDB(db *sql.DB, next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), "db", db)
 		next(w, r.WithContext(ctx))
+	}
+}
+func dispatch(h *Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			h.CreateOrUpdateShortLink(w, r)
+		case http.MethodGet:
+			h.ListUserLinks(w, r)
+		default:
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		}
 	}
 }

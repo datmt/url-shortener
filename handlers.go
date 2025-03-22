@@ -79,3 +79,29 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusCreated)
 }
+
+func (h *Handler) ListUserLinks(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value("username").(string)
+
+	rows, err := h.Store.DB.Query("SELECT handle, target FROM links WHERE owner = ?", username)
+	if err != nil {
+		http.Error(w, "Failed to load links", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	type Link struct {
+		Handle string `json:"handle"`
+		Target string `json:"target"`
+	}
+	var links []Link
+	for rows.Next() {
+		var l Link
+		if err := rows.Scan(&l.Handle, &l.Target); err == nil {
+			links = append(links, l)
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(links)
+}
