@@ -94,7 +94,8 @@ func (h *Handler) ListUserLinks(w http.ResponseWriter, r *http.Request) {
 		Handle string `json:"handle"`
 		Target string `json:"target"`
 	}
-	var links []Link
+
+	links := []Link{}
 	for rows.Next() {
 		var l Link
 		if err := rows.Scan(&l.Handle, &l.Target); err == nil {
